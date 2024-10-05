@@ -81,7 +81,7 @@ end_loop:
 
 # print result function
 print_result:
-    mv t0, a0               # t0 = minimum flips result
+    mv t0, a0                  # t0 = minimum flips result
     
     la a0, format
     li a7, 4
