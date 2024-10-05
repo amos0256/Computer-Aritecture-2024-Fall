@@ -49,9 +49,9 @@ int minFlips(int a, int b, int c) {
 
 int main(void) {
   // examples
-  int a[3] = {143165576, 51041, 1};
-  int b[3] = {715827882, 65280, 2};
-  int c[3] = {1, 716177407, 3};
+  int a[3] = {1, 51041, 143165576};
+  int b[3] = {2, 65280, 715827882};
+  int c[3] = {3, 716177407, 1};
   // expected output:
   // example 1: 23
   // example 2: 14

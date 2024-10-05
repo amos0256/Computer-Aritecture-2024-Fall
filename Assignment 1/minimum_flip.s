@@ -1,10 +1,10 @@
     .data
 example_1:
-    .word 143165576, 715827882, 1
+    .word 1, 2, 3
 example_2:
     .word 51041, 65280, 716177407
 example_3:
-    .word 1, 2, 3
+    .word 143165576, 715827882, 1
 format:
     .asciz "Minimum flips is "
 newline:
