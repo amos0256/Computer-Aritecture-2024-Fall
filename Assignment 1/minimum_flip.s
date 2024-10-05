@@ -12,116 +12,82 @@ newline:
 
     .text
     .global main
-
 main:
+    # example_1
+    la    t0, example_1        # load address of example_1
+    lw    a0, 0(t0)
+    lw    a1, 4(t0)
+    lw    a2, 8(t0)
+    jal   ra, min_flips
+    jal   ra, print_result
 
-    # example 1
-    la t0, example_1        # load address of example_1
-    lw a0, 0(t0)
-    lw a1, 4(t0)
-    lw a2, 8(t0)
-    jal ra, min_flips       # call min_flips
-    # print the result of example 1
-    jal print_result
+    # example_2
+    la    t0, example_2        # load address of example_2
+    lw    a0, 0(t0)
+    lw    a1, 4(t0)
+    lw    a2, 8(t0)
+    jal   ra, min_flips
+    jal   ra, print_result
 
-    # example 2
-    la t0, example_2        # load address of example_2
-    lw a0, 0(t0)
-    lw a1, 4(t0)
-    lw a2, 8(t0)
-    jal ra, min_flips       # call min_flips
-    # print the result of example 1
-    jal print_result
+    # example_3
+    la    t0, example_3        # load address of example_3
+    lw    a0, 0(t0)
+    lw    a1, 4(t0)
+    lw    a2, 8(t0)
+    jal   ra, min_flips
+    jal   ra, print_result
 
-    # example 3
-    la t0, example_3        # load address of example_3
-    lw a0, 0(t0)
-    lw a1, 4(t0)
-    lw a2, 8(t0)
-    jal ra, min_flips       # call min_flips
-    # print the result of example 3
-    jal print_result
-
-    # exit the program
-    li a7, 10
+    # exit program
+    li    a7, 10               # syscall exit
     ecall
 
-max_num:
-    addi sp, sp, -16
-    sw ra, 12(sp)           # save return address
-
-    mv t4, t1               # set temporary max A
-    blt t4, t2, check_B     # if A < B, goto check_B
-    j check_C               # goto check_C
-
-check_B:
-    mv t4, t2               # set max to B
-
-check_C:
-    blt t4, t3, end_max_num # if max < C, goto end_max_num
-    mv t4, t3               # set max to C
-    
-end_max_num:
-    mv t1, t4
-    lw ra, 12(sp)           # restore return address
-    addi sp, sp, 16         # restore stack
-    ret
-
+# min flips function
 min_flips:
-    li t0, 0                # flips = 0
+    li    t0, 0                # flips = 0
+    li    t1, 31               # i = 31, 31 bits
 
-    # compute the maxBit = 31 - __builtin_clz(maxNum(a, b, c))
-    jal max_num              # call max_num function
+loop:
+    bltz   t1, end_loop        # if i < 0, goto end_loop
 
-    li t2, 31               # t2 = 31
-    clz t3, t1              # t3 = __builtin_clz(max_num)
-    sub t4, t2, t3          # t4 = maxBit
+    srl    t2, a0, t1          # bitA = (a >> i) & 1
+    andi   t2, t2, 1
 
-    li t5, 0                # i counter
+    srl    t3, a1, t1          # bitB = (b >> i) & 1
+    andi   t3, t3, 1
 
-for_loop:
-    bgt t5, t4, end_loop    # if i > maxBit, goto end_loop
+    srl    t4, a2, t1          # bitC = (c >> i) & 1
+    andi   t4, t4, 1
 
-    # extract bitA, bitB, bitC
-    srl t6, t1, t5          # t6 = a >> i
-    andi t6, t6, 1          # bitA = (a >> i) & 1
-    srl t3, t2, t5          # t3 = b >> i
-    andi t3, t3, 1          # bitB = (b >> i) & 1
-    srl t4, t3, t5          # t4 = c >> i
-    andi t4, t4, 1          # bitC = (c >> i) & 1
-
-    # compute the flip times
-    beq t4, x0, flip_case   # if bitC == 0, goto flip_case
-    beq t6, x0, check_bitB  # if bitA == 0, goto check_bitB
-    j end_inner_if
-
-check_bitB:
-    beq t3, x0, add_flip    # if bitB == 0, goto add_flip
-    j end_inner_if
+    beqz   t4, add_flip        # if bitC == 0, goto add_flip
+    beqz   t2, check_b         # if bitA == 0, goto check_b
+    j      continue_loop
 
 add_flip:
-    addi t0, t0, 1          # flips += 1
+    add    t0, t0, t2          # flips += bitA
+    add    t0, t0, t3          # flips += bitB
+    j      continue_loop
 
-flip_case:
-    add t0, t0, t6          # flips += bitA
-    add t0, t0, t3          # flips += bitB
-    j end_case
+check_b:
+    bnez   t3, continue_loop   # if bitB != 0, goto continue_loop
+    addi   t0, t0, 1           # flips += 1
 
-end_case:
-    addi t5, t5, 1          # i++
-    j for_loop              # goto for_loop
+continue_loop:
+    addi   t1, t1, -1          # i--
+    j      loop
 
 end_loop:
+    mv     a0, t0              # restore return value
     ret
 
+# print result function
 print_result:
-    mv t6, a0               # t0 = minimum flips result
+    mv t0, a0               # t0 = minimum flips result
     
     la a0, format
     li a7, 4
     ecall
 
-    mv a0, t6
+    mv a0, t0
     li a7, 1
     ecall
 
