@@ -1,43 +1,51 @@
     .data
-example_1:
+examples:
     .word 1, 2, 3
-example_2:
     .word 51041, 65280, 716177407
-example_3:
     .word 143165576, 715827882, 1
 
-format:
-    .asciz "Minimum flips is "
+expected_res:
+    .word 0
+    .word 14
+    .word 23
+
+correct_msg:
+    .asciz "Correct"
+
+wrong_msg:
+    .asciz "Wrong"
+
 newline:
     .asciz ".\n"
 
     .text
     .global main
 main:
-    # example_1
-    la    t0, example_1       # load address of example_1
+    la    t0, examples        # t0 = address of examples
+    la    t1, expected_res    # t1 = address of expected_res
+    li    t2, 3               # t2 = number of examples
+    li    t3, 0               # t3 = for loop counter
+
+loop_example:
+    beq   t2, t3, end_main    # if counter == 3, goto end_main
+
+    # load the current example's value
     lw    a0, 0(t0)
     lw    a1, 4(t0)
     lw    a2, 8(t0)
-    jal   ra, min_flips
-    jal   ra, print_result
 
-    # example_2
-    la    t0, example_2       # load address of example_2
-    lw    a0, 0(t0)
-    lw    a1, 4(t0)
-    lw    a2, 8(t0)
-    jal   ra, min_flips
-    jal   ra, print_result
+    jal   ra, min_flips       # call min_flips
 
-    # example_3
-    la    t0, example_3       # load address of example_3
-    lw    a0, 0(t0)
-    lw    a1, 4(t0)
-    lw    a2, 8(t0)
-    jal   ra, min_flips
-    jal   ra, print_result
+    lw    a1, 0(t1)           # load the current expected result
+    jal   ra, print_result    # call print_result 
 
+    addi  t0, t0, 12          # move to the next example
+    addi  t1, t1, 4           # move to the next expected result
+
+    addi  t3, t3, 1           # increment loop counter
+    j     loop_example
+
+end_main:
     # exit program
     li    a7, 10              # syscall exit
     ecall
@@ -59,6 +67,7 @@ my_clz_loop:
 
 end_my_clz:
     mv    a0, t0              # return the count
+
     ret
 
 # max number function
@@ -76,10 +85,18 @@ check_c:
     
 end_max_num:
     mv    a0, t0
+
     ret
 
 # min flips function
 min_flips:
+    # preserve t0-t3 registers
+    addi  sp, sp, -16
+    sw    t0, 0(sp)
+    sw    t1, 4(sp)
+    sw    t2, 8(sp)
+    sw    t3, 12(sp)
+
     # push the input parameters into the stack
     addi  sp, sp, -16         # allocate space on the stack
     sw    ra, 12(sp)
@@ -98,7 +115,6 @@ min_flips:
     lw    a0, 0(sp)
     lw    a1, 4(sp)
     lw    a2, 8(sp) 
-    addi  sp, sp, 12          # deallocate space from the stack
 
 loop:
     bltz  t1, end_loop        # if i < 0, goto end_loop
@@ -131,22 +147,33 @@ continue_loop:
 
 end_loop:
     mv     a0, t0             # restore return value
-    lw     ra, 0(sp)
-    addi   sp, sp, 4
+    lw     ra, 12(sp)
+    addi   sp, sp, 16
+
+    # restore t0-t3 registers
+    lw    t0, 0(sp)
+    lw    t1, 4(sp)
+    lw    t2, 8(sp)
+    lw    t3, 12(sp)
+    addi  sp, sp, 16
+
     ret
 
 # print result function
 print_result:
-    mv     t0, a0             # t0 = minimum flips result
-    
-    la     a0, format
+    bne    a0, a1, wrong_case # if a0 != a1, goto wrong_case
+
+    la     a0, correct_msg
+    li     a7, 4
+    ecall
+    j     end_print
+
+wrong_case:
+    la     a0, wrong_msg
     li     a7, 4
     ecall
 
-    mv     a0, t0
-    li     a7, 1
-    ecall
-
+end_print:
     la     a0, newline
     li     a7, 4
     ecall
