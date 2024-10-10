@@ -29,9 +29,9 @@ int main(void) {
   int b[3] = {2, 65280, 715827882};
   int c[3] = {3, 716177407, 1};
   // expected output:
-  // example 1: 23
+  // example 1: 0
   // example 2: 14
-  // example 3: 0
+  // example 3: 23
 
   for (int i = 0; i < 3; i++) {
     printf("Minimum flips is %d.\n", minFlips(a[i], b[i], c[i]));
