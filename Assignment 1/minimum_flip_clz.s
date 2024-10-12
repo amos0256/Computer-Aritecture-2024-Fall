@@ -70,24 +70,6 @@ end_my_clz:
 
     ret
 
-# max number function
-max_num:
-    mv    t0, a0              # set temporary max a
-    blt   t0, a1, set_b       # if a < b, goto set_b
-    j     check_c             # goto check_c
-
-set_b:
-    mv    t0, a1              # set max to b
-
-check_c:
-    blt   a2, t0, end_max_num # if max > c, goto end_max_num
-    mv    t0, a2              # set max to c
-    
-end_max_num:
-    mv    a0, t0
-
-    ret
-
 # min flips function
 min_flips:
     # preserve t0-t3 registers
@@ -104,7 +86,8 @@ min_flips:
     sw    a1, 4(sp)
     sw    a2, 8(sp)
 
-    jal   ra, max_num         # find the maximum of a, b, c
+    or    a1, a1, a2          # b OR c
+    or    a0, a0, a1          # a OR b OR c
     jal   ra, my_clz          # compute the leading zero
     
     li    t0, 0               # flips = 0

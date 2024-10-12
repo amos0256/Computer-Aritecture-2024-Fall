@@ -13,21 +13,10 @@ static inline int my_clz(uint32_t x) {
     return count;
 }
 
-int maxNum(int a, int b, int c) {
-  if (a >= b && a >= c) {
-    return a;
-  }
-  else if (b >= a && b >= c) {
-    return b;
-  }
-  
-  return c;
-}
-
 int minFlips(int a, int b, int c) {
   int flips = 0;
     
-  int maxBit = 31 - my_clz(maxNum(a, b, c));
+  int maxBit = 31 - my_clz(a | b | c);
 
   for (int i = 0; i <= maxBit; i++) {
     int bitA = (a >> i) & 1;
